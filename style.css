@@ -858,6 +858,10 @@ button {
   display: none;
 }
 
+.hidden-field {
+  display: none;
+}
+
 .image-controls {
   display: none;
   align-items: center;
