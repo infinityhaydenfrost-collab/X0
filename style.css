@@ -17,6 +17,7 @@
   --shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
   --radius-large: 32px;
   --radius-medium: 18px;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 body {
@@ -58,7 +59,7 @@ button {
   border-radius: 0 var(--radius-large) var(--radius-large) 0;
   box-shadow: var(--shadow);
   transform: translateX(-105%);
-  transition: transform 0.25s ease;
+  transition: transform 0.28s var(--ease-out);
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -193,7 +194,7 @@ button {
   z-index: 10;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.28s ease;
 }
 
 .overlay.show {
@@ -278,7 +279,7 @@ button {
 }
 
 .view-panel {
-  display: none;
+  display: grid;
   gap: 12px;
   margin-bottom: 18px;
   padding: 10px;
@@ -286,10 +287,19 @@ button {
   background: var(--surface);
   border: 1px solid #f0f0f0;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: max-height 0.28s var(--ease-out), opacity 0.2s ease, transform 0.28s var(--ease-out);
 }
 
 .view-panel.open {
-  display: grid;
+  max-height: 620px;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .view-section {
@@ -389,8 +399,9 @@ button {
 
 .folder-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  grid-template-columns: repeat(auto-fill, var(--note-card-size, 132px));
   gap: 16px;
+  justify-content: start;
 }
 
 .folder-card {
@@ -403,6 +414,13 @@ button {
   color: #111;
   background: #ffd54d;
   box-shadow: 0 12px 22px rgba(0, 0, 0, 0.10);
+  animation: cardIn 0.24s var(--ease-out) both;
+  transition: transform 0.18s var(--ease-out), box-shadow 0.18s ease;
+}
+
+.folder-card:active,
+.note-card:active {
+  transform: scale(0.97);
 }
 
 .folder-card.folder-red {
@@ -468,6 +486,8 @@ button {
   -webkit-user-select: none;
   user-select: none;
   touch-action: manipulation;
+  animation: cardIn 0.24s var(--ease-out) both;
+  transition: transform 0.18s var(--ease-out);
 }
 
 .note-paper {
@@ -632,20 +652,29 @@ button {
   box-shadow: var(--shadow);
   font-size: 34px;
   z-index: 5;
+  transition: transform 0.18s var(--ease-out), box-shadow 0.18s ease;
+}
+
+.add-note-button:active {
+  transform: scale(0.94);
 }
 
 .note-action-sheet {
   position: fixed;
   inset: 0;
   z-index: 45;
-  display: none;
+  display: flex;
   align-items: flex-end;
   padding: 18px;
   background: rgba(0, 0, 0, 0.16);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
 }
 
 .note-action-sheet.open {
-  display: flex;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .note-action-panel {
@@ -656,6 +685,12 @@ button {
   border-radius: 24px;
   background: var(--surface);
   box-shadow: var(--shadow);
+  transform: translateY(18px);
+  transition: transform 0.24s var(--ease-out);
+}
+
+.note-action-sheet.open .note-action-panel {
+  transform: translateY(0);
 }
 
 .note-action-title {
@@ -699,11 +734,26 @@ button {
   inset: 0;
   z-index: 50;
   background: var(--surface);
-  display: none;
+  display: block;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
 }
 
 .editor-modal.open {
-  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .editor-card {

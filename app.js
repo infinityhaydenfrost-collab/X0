@@ -55,7 +55,6 @@ const folderMenuBtn = document.querySelector("#folderMenuBtn");
 const folderActions = document.querySelector("#folderActions");
 const createFolderBtn = document.querySelector("#createFolderBtn");
 const renameFolderBtn = document.querySelector("#renameFolderBtn");
-const folderList = document.querySelector("#folderList");
 const notesArea = document.querySelector("#notesArea");
 const pageTitle = document.querySelector("#pageTitle");
 const pageSubtitle = document.querySelector("#pageSubtitle");
@@ -590,33 +589,7 @@ function renderCounts() {
   document.querySelector("#favCount").textContent = state.notes.filter(n => n.favorite && !n.trashed).length;
   document.querySelector("#lockedCount").textContent = state.notes.filter(n => n.locked && !n.trashed).length;
   document.querySelector("#trashCount").textContent = state.notes.filter(n => n.trashed).length;
-  document.querySelector("#folderCount").textContent = state.folders.length;
   document.querySelector("#folderMenuCount").textContent = state.folders.length;
-}
-
-function renderFolders() {
-  folderList.innerHTML = "";
-
-  state.folders.forEach(folder => {
-    const count = state.notes.filter(note => note.folderId === folder.id && !note.trashed).length;
-
-    const button = document.createElement("button");
-    button.className = `folder-item ${currentFolderId === folder.id ? "active" : ""}`;
-    button.innerHTML = `
-      <span class="folder-icon ${folder.color}"></span>
-      <span>${folder.name}</span>
-      <span class="menu-count">${count}</span>
-    `;
-
-    button.addEventListener("click", () => {
-      currentFolderId = folder.id;
-      currentFilter = "folder";
-      closeSidebar();
-      render();
-    });
-
-    folderList.appendChild(button);
-  });
 }
 
 function createFolder() {
@@ -729,6 +702,7 @@ function renderNotes() {
 
 function renderFolderOverview() {
   notesArea.className = "notes-area folders-overview";
+  notesArea.style.setProperty("--note-card-size", `${getCardWidthFromScale(state.preferences.cardSize)}px`);
 
   const grid = document.createElement("div");
   grid.className = "folder-card-grid";
@@ -869,7 +843,6 @@ function updateViewPreference(key, value) {
 
 function render() {
   renderCounts();
-  renderFolders();
   renderFolderSelect();
   renderMenuActiveState();
   renderViewControls();
