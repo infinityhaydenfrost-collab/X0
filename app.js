@@ -1,4 +1,5 @@
 const STORAGE_KEY = "hayden_notes_v1";
+const STORAGE_BACKUP_KEY = "hayden_notes_v1_backup";
 
 const defaultViewPreferences = {
   sortBy: "updatedAt",
@@ -99,8 +100,11 @@ let autoSaveTimer = null;
 
 function loadState() {
   const raw = localStorage.getItem(STORAGE_KEY);
+  const backup = localStorage.getItem(STORAGE_BACKUP_KEY);
 
   if (!raw) {
+    if (backup) return normalizeLoadedState(backup);
+
     return {
       folders: defaultFolders,
       notes: starterNotes,
@@ -110,11 +114,15 @@ function loadState() {
 
   try {
     const parsed = JSON.parse(raw);
-    return {
-      ...parsed,
-      preferences: { ...defaultViewPreferences, ...(parsed.preferences || {}) }
-    };
+    if ((!parsed.notes || parsed.notes.length === 0) && backup) {
+      const backupState = normalizeLoadedState(backup);
+      if (backupState.notes.length > 0) return backupState;
+    }
+
+    return normalizeState(parsed);
   } catch {
+    if (backup) return normalizeLoadedState(backup);
+
     return {
       folders: defaultFolders,
       notes: starterNotes,
@@ -123,7 +131,32 @@ function loadState() {
   }
 }
 
+function normalizeLoadedState(raw) {
+  return normalizeState(JSON.parse(raw));
+}
+
+function normalizeState(parsed) {
+  return {
+    ...parsed,
+    folders: parsed.folders?.length ? parsed.folders : defaultFolders,
+    notes: Array.isArray(parsed.notes) ? parsed.notes : starterNotes,
+    preferences: { ...defaultViewPreferences, ...(parsed.preferences || {}) }
+  };
+}
+
 function saveState() {
+  const previous = localStorage.getItem(STORAGE_KEY);
+  if (previous) {
+    try {
+      const previousState = JSON.parse(previous);
+      if (previousState.notes?.length) {
+        localStorage.setItem(STORAGE_BACKUP_KEY, previous);
+      }
+    } catch {
+      localStorage.setItem(STORAGE_BACKUP_KEY, previous);
+    }
+  }
+
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
@@ -636,7 +669,7 @@ function renderFolderSelect() {
 }
 
 function renderHeader(visibleNotes) {
-  let title = "Toutes les notes 2.1";
+  let title = "Toutes les notes 2.2";
 
   if (currentFolderId) {
     title = state.folders.find(folder => folder.id === currentFolderId)?.name ?? "Dossier";
