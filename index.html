@@ -24,12 +24,6 @@
         <button class="icon-button" id="folderMenuBtn" aria-label="Options des dossiers">⋮</button>
       </div>
 
-      <div class="folder-actions" id="folderActions">
-        <button type="button" id="createFolderBtn">Créer un dossier</button>
-        <button type="button" id="renameFolderBtn">Renommer le dossier</button>
-        <button type="button" id="colorFolderBtn">Couleur du dossier</button>
-      </div>
-
       <nav class="menu">
         <button class="menu-item active" data-filter="all">
           <span class="menu-icon">▣</span>
@@ -91,6 +85,11 @@
       </div>
 
       <section class="view-panel" id="viewPanel" aria-label="Personnalisation de l'affichage">
+        <div class="view-section folder-create-section" id="folderCreateSection">
+          <h2>Dossiers</h2>
+          <button class="view-command" type="button" id="createFolderBtn">Créer un dossier</button>
+        </div>
+
         <div class="view-section">
           <h2>Trier</h2>
           <div class="view-control">
@@ -174,6 +173,8 @@
           <button type="button" data-cover-position="100% 50%">Droite</button>
         </div>
         <button type="button" id="removeCoverBtn">Retirer la couverture</button>
+        <button type="button" id="renameFolderBtn">Renommer le dossier</button>
+        <button type="button" id="colorFolderBtn">Couleur du dossier</button>
         <button type="button" class="danger" id="deleteSelectedNoteBtn">Supprimer</button>
         <button type="button" id="closeNoteActionBtn">Annuler</button>
       </div>

@@ -82,25 +82,6 @@ button {
   margin-bottom: 14px;
 }
 
-.folder-actions {
-  display: none;
-  gap: 8px;
-  margin-bottom: 22px;
-}
-
-.folder-actions.open {
-  display: grid;
-}
-
-.folder-actions button {
-  min-height: 42px;
-  padding: 0 14px;
-  border-radius: 14px;
-  background: var(--surface-soft);
-  font-size: 15px;
-  text-align: left;
-}
-
 .icon-button {
   width: 40px;
   height: 40px;
@@ -326,6 +307,15 @@ button {
   color: #777;
   font-size: 13px;
   font-weight: 800;
+}
+
+.view-command {
+  grid-column: 1 / -1;
+  min-height: 42px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .view-control {

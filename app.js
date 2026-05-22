@@ -52,8 +52,6 @@ const sidebar = document.querySelector("#sidebar");
 const overlay = document.querySelector("#overlay");
 const openSidebarBtn = document.querySelector("#openSidebarBtn");
 const closeSidebarBtn = document.querySelector("#closeSidebarBtn");
-const folderMenuBtn = document.querySelector("#folderMenuBtn");
-const folderActions = document.querySelector("#folderActions");
 const createFolderBtn = document.querySelector("#createFolderBtn");
 const renameFolderBtn = document.querySelector("#renameFolderBtn");
 const colorFolderBtn = document.querySelector("#colorFolderBtn");
@@ -66,6 +64,7 @@ const searchPanel = document.querySelector("#searchPanel");
 const searchInput = document.querySelector("#searchInput");
 const viewOptionsBtn = document.querySelector("#viewOptionsBtn");
 const viewPanel = document.querySelector("#viewPanel");
+const folderCreateSection = document.querySelector("#folderCreateSection");
 const sortBySelect = document.querySelector("#sortBySelect");
 const sortDirectionSelect = document.querySelector("#sortDirectionSelect");
 const viewModeSelect = document.querySelector("#viewModeSelect");
@@ -96,6 +95,7 @@ const deleteSelectedNoteBtn = document.querySelector("#deleteSelectedNoteBtn");
 const closeNoteActionBtn = document.querySelector("#closeNoteActionBtn");
 let selectedImageFigure = null;
 let selectedNoteId = null;
+let selectedFolderId = null;
 let savedEditorRange = null;
 let autoSaveTimer = null;
 
@@ -445,16 +445,39 @@ function openNoteActions(noteId) {
   if (!note) return;
 
   selectedNoteId = noteId;
+  selectedFolderId = null;
   noteActionTitle.textContent = note.title || "Sans titre";
   coverNoteBtn.textContent = note.coverImage ? "Changer la couverture" : "Ajouter une couverture";
+  coverNoteBtn.style.display = "block";
   coverPositionControls.style.display = note.coverImage ? "grid" : "none";
   removeCoverBtn.style.display = note.coverImage ? "block" : "none";
+  renameFolderBtn.style.display = "none";
+  colorFolderBtn.style.display = "none";
+  deleteSelectedNoteBtn.style.display = "block";
+  noteActionSheet.classList.add("open");
+  noteActionSheet.setAttribute("aria-hidden", "false");
+}
+
+function openFolderActions(folderId) {
+  const folder = state.folders.find(item => item.id === folderId);
+  if (!folder) return;
+
+  selectedFolderId = folderId;
+  selectedNoteId = null;
+  noteActionTitle.textContent = folder.name;
+  coverNoteBtn.style.display = "none";
+  coverPositionControls.style.display = "none";
+  removeCoverBtn.style.display = "none";
+  renameFolderBtn.style.display = "block";
+  colorFolderBtn.style.display = "block";
+  deleteSelectedNoteBtn.style.display = "none";
   noteActionSheet.classList.add("open");
   noteActionSheet.setAttribute("aria-hidden", "false");
 }
 
 function closeNoteActions() {
   selectedNoteId = null;
+  selectedFolderId = null;
   noteActionSheet.classList.remove("open");
   noteActionSheet.setAttribute("aria-hidden", "true");
 }
@@ -642,12 +665,14 @@ function createFolder() {
 }
 
 function renameCurrentFolder() {
-  if (!currentFolderId) {
-    alert("Ouvre d'abord un dossier a renommer.");
+  const folderId = selectedFolderId || currentFolderId;
+
+  if (!folderId) {
+    alert("Selectionne d'abord un dossier a renommer.");
     return;
   }
 
-  const folder = state.folders.find(item => item.id === currentFolderId);
+  const folder = state.folders.find(item => item.id === folderId);
   if (!folder) return;
 
   const name = prompt("Nouveau nom du dossier", folder.name);
@@ -655,16 +680,19 @@ function renameCurrentFolder() {
 
   folder.name = name.trim();
   saveState();
+  closeNoteActions();
   render();
 }
 
 function changeCurrentFolderColor() {
-  if (!currentFolderId) {
-    alert("Ouvre d'abord un dossier pour changer sa couleur.");
+  const folderId = selectedFolderId || currentFolderId;
+
+  if (!folderId) {
+    alert("Selectionne d'abord un dossier pour changer sa couleur.");
     return;
   }
 
-  const folder = state.folders.find(item => item.id === currentFolderId);
+  const folder = state.folders.find(item => item.id === folderId);
   if (!folder) return;
 
   const color = prompt("Couleur : rouge, bleu, vert, jaune, violet ou rose", "jaune");
@@ -684,6 +712,7 @@ function changeCurrentFolderColor() {
 
   folder.color = nextColor;
   saveState();
+  closeNoteActions();
   render();
 }
 
@@ -781,15 +810,49 @@ function renderFolderOverview() {
     `;
 
     button.addEventListener("click", () => {
+      if (button.dataset.longPressed === "true") {
+        button.dataset.longPressed = "false";
+        return;
+      }
+
       currentFolderId = folder.id;
       currentFilter = "folder";
       render();
     });
 
+    attachFolderCardActions(button, folder.id);
+
     grid.appendChild(button);
   });
 
   notesArea.appendChild(grid);
+}
+
+function attachFolderCardActions(card, folderId) {
+  let longPressTimer = null;
+
+  const startPress = event => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+
+    window.clearTimeout(longPressTimer);
+    longPressTimer = window.setTimeout(() => {
+      card.dataset.longPressed = "true";
+      openFolderActions(folderId);
+    }, 540);
+  };
+
+  const cancelPress = () => {
+    window.clearTimeout(longPressTimer);
+  };
+
+  card.addEventListener("pointerdown", startPress);
+  card.addEventListener("pointerup", cancelPress);
+  card.addEventListener("pointerleave", cancelPress);
+  card.addEventListener("pointercancel", cancelPress);
+  card.addEventListener("contextmenu", event => {
+    event.preventDefault();
+    openFolderActions(folderId);
+  });
 }
 
 function renderNotesGrid(notes) {
@@ -887,6 +950,7 @@ function renderMenuActiveState() {
 }
 
 function renderViewControls() {
+  folderCreateSection.style.display = currentFilter === "folders" ? "grid" : "none";
   sortBySelect.value = state.preferences.sortBy;
   sortDirectionSelect.value = state.preferences.sortDirection;
   viewModeSelect.value = state.preferences.viewMode;
@@ -1041,10 +1105,6 @@ openSidebarBtn.addEventListener("click", openSidebar);
 closeSidebarBtn.addEventListener("click", closeSidebar);
 overlay.addEventListener("click", closeSidebar);
 attachSidebarSwipeClose();
-
-folderMenuBtn.addEventListener("click", () => {
-  folderActions.classList.toggle("open");
-});
 
 createFolderBtn.addEventListener("click", createFolder);
 renameFolderBtn.addEventListener("click", renameCurrentFolder);
