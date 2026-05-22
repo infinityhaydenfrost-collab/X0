@@ -21,7 +21,12 @@
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <button class="icon-button" id="closeSidebarBtn" aria-label="Fermer le menu">×</button>
-        <button class="icon-button" aria-label="Paramètres">⚙</button>
+        <button class="icon-button" id="folderMenuBtn" aria-label="Options des dossiers">⋮</button>
+      </div>
+
+      <div class="folder-actions" id="folderActions">
+        <button type="button" id="createFolderBtn">Créer un dossier</button>
+        <button type="button" id="renameFolderBtn">Renommer le dossier</button>
       </div>
 
       <nav class="menu">
@@ -90,62 +95,68 @@
       </div>
 
       <section class="view-panel" id="viewPanel" aria-label="Personnalisation de l'affichage">
-        <div class="view-control">
-          <label for="sortBySelect">Trier par</label>
-          <select id="sortBySelect">
-            <option value="updatedAt">Modification</option>
-            <option value="createdAt">Creation</option>
-            <option value="title">Alphabetique</option>
-          </select>
+        <div class="view-section">
+          <h2>Trier</h2>
+          <div class="view-control">
+            <label for="sortBySelect">Trier par</label>
+            <select id="sortBySelect">
+              <option value="updatedAt">Modification</option>
+              <option value="createdAt">Creation</option>
+              <option value="title">Alphabetique</option>
+            </select>
+          </div>
+
+          <div class="view-control">
+            <label for="sortDirectionSelect">Ordre</label>
+            <select id="sortDirectionSelect">
+              <option value="desc">Decroissant</option>
+              <option value="asc">Croissant</option>
+            </select>
+          </div>
         </div>
 
-        <div class="view-control">
-          <label for="sortDirectionSelect">Ordre</label>
-          <select id="sortDirectionSelect">
-            <option value="desc">Decroissant</option>
-            <option value="asc">Croissant</option>
-          </select>
+        <div class="view-section">
+          <h2>Afficher</h2>
+          <div class="view-control">
+            <label for="viewModeSelect">Vue</label>
+            <select id="viewModeSelect">
+              <option value="grid">Grille</option>
+              <option value="list">Liste</option>
+              <option value="compact">Compact</option>
+              <option value="gallery">Galerie</option>
+              <option value="detail">Detail</option>
+            </select>
+          </div>
+
+          <div class="view-control view-range-control">
+            <label for="cardSizeRange">Taille <span id="cardSizeValue">1</span></label>
+            <input id="cardSizeRange" type="range" min="1" max="100" step="1" />
+          </div>
+
+          <div class="view-control">
+            <label for="cardStyleSelect">Style</label>
+            <select id="cardStyleSelect">
+              <option value="paper">Papier</option>
+              <option value="flat">Plat</option>
+              <option value="soft">Doux</option>
+            </select>
+          </div>
+
+          <label class="view-toggle">
+            <input type="checkbox" id="showPreviewToggle" />
+            <span>Apercu</span>
+          </label>
+
+          <label class="view-toggle">
+            <input type="checkbox" id="showDateToggle" />
+            <span>Date</span>
+          </label>
+
+          <label class="view-toggle">
+            <input type="checkbox" id="groupByMonthToggle" />
+            <span>Mois</span>
+          </label>
         </div>
-
-        <div class="view-control">
-          <label for="viewModeSelect">Vue</label>
-          <select id="viewModeSelect">
-            <option value="grid">Grille</option>
-            <option value="list">Liste</option>
-            <option value="compact">Compact</option>
-            <option value="gallery">Galerie</option>
-            <option value="detail">Detail</option>
-          </select>
-        </div>
-
-        <div class="view-control view-range-control">
-          <label for="cardSizeRange">Taille <span id="cardSizeValue">1</span></label>
-          <input id="cardSizeRange" type="range" min="1" max="100" step="1" />
-        </div>
-
-        <div class="view-control">
-          <label for="cardStyleSelect">Style</label>
-          <select id="cardStyleSelect">
-            <option value="paper">Papier</option>
-            <option value="flat">Plat</option>
-            <option value="soft">Doux</option>
-          </select>
-        </div>
-
-        <label class="view-toggle">
-          <input type="checkbox" id="showPreviewToggle" />
-          <span>Apercu</span>
-        </label>
-
-        <label class="view-toggle">
-          <input type="checkbox" id="showDateToggle" />
-          <span>Date</span>
-        </label>
-
-        <label class="view-toggle">
-          <input type="checkbox" id="groupByMonthToggle" />
-          <span>Mois</span>
-        </label>
       </section>
 
       <section class="notes-area" id="notesArea"></section>
@@ -181,13 +192,7 @@
             <button class="editor-icon-button" id="favoriteBtn" aria-label="Ajouter aux favoris">&#9734;</button>
             <button class="editor-icon-button danger" id="deleteBtn" aria-label="Supprimer la note">&#128465;</button>
             <button class="editor-icon-button" aria-label="Plus d'options">&#8942;</button>
-            <button class="text-button primary" id="saveNoteBtn">OK</button>
           </div>
-        </div>
-
-        <div class="editor-meta-row">
-          <select id="noteFolderSelect" aria-label="Dossier de la note"></select>
-          <span class="editor-date" id="editorDate">Maintenant</span>
         </div>
 
         <div class="editor-tools" aria-label="Outils d'ecriture">

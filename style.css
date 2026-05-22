@@ -74,7 +74,26 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 34px;
+  margin-bottom: 14px;
+}
+
+.folder-actions {
+  display: none;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.folder-actions.open {
+  display: grid;
+}
+
+.folder-actions button {
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+  font-size: 15px;
+  text-align: left;
 }
 
 .icon-button {
@@ -256,17 +275,31 @@ button {
 
 .view-panel {
   display: none;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 24px;
-  padding: 12px;
-  border-radius: 22px;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 10px;
+  border-radius: 18px;
   background: var(--surface);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
 }
 
 .view-panel.open {
   display: grid;
+}
+
+.view-section {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.view-section h2 {
+  grid-column: 1 / -1;
+  margin: 2px 2px 0;
+  color: #777;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .view-control {

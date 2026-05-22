@@ -51,6 +51,10 @@ const sidebar = document.querySelector("#sidebar");
 const overlay = document.querySelector("#overlay");
 const openSidebarBtn = document.querySelector("#openSidebarBtn");
 const closeSidebarBtn = document.querySelector("#closeSidebarBtn");
+const folderMenuBtn = document.querySelector("#folderMenuBtn");
+const folderActions = document.querySelector("#folderActions");
+const createFolderBtn = document.querySelector("#createFolderBtn");
+const renameFolderBtn = document.querySelector("#renameFolderBtn");
 const folderList = document.querySelector("#folderList");
 const notesArea = document.querySelector("#notesArea");
 const pageTitle = document.querySelector("#pageTitle");
@@ -74,13 +78,11 @@ const addNoteBtn = document.querySelector("#addNoteBtn");
 
 const editorModal = document.querySelector("#editorModal");
 const cancelEditBtn = document.querySelector("#cancelEditBtn");
-const saveNoteBtn = document.querySelector("#saveNoteBtn");
 const noteTitleInput = document.querySelector("#noteTitleInput");
 const noteContentInput = document.querySelector("#noteContentInput");
 const noteFolderSelect = document.querySelector("#noteFolderSelect");
 const favoriteBtn = document.querySelector("#favoriteBtn");
 const deleteBtn = document.querySelector("#deleteBtn");
-const editorDate = document.querySelector("#editorDate");
 const imageInput = document.querySelector("#imageInput");
 const imageControls = document.querySelector("#imageControls");
 const coverInput = document.querySelector("#coverInput");
@@ -94,6 +96,7 @@ const closeNoteActionBtn = document.querySelector("#closeNoteActionBtn");
 let selectedImageFigure = null;
 let selectedNoteId = null;
 let savedEditorRange = null;
+let autoSaveTimer = null;
 
 function loadState() {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -123,6 +126,11 @@ function loadState() {
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function createId(prefix) {
+  if (crypto.randomUUID) return crypto.randomUUID();
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 function getCardWidthFromScale(scale) {
@@ -264,17 +272,6 @@ function getMonthLabel(dateString) {
 function getShortDate(dateString) {
   const date = new Date(dateString);
   return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
-}
-
-function getEditorDateLabel(dateString) {
-  const date = dateString ? new Date(dateString) : new Date();
-  return date.toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
 }
 
 function setFavoriteButton(isFavorite) {
@@ -621,6 +618,38 @@ function renderFolders() {
   });
 }
 
+function createFolder() {
+  const name = prompt("Nom du nouveau dossier");
+  if (!name || !name.trim()) return;
+
+  const colors = ["folder-red", "folder-blue", "folder-green"];
+  state.folders.push({
+    id: createId("folder"),
+    name: name.trim(),
+    color: colors[state.folders.length % colors.length]
+  });
+
+  saveState();
+  render();
+}
+
+function renameCurrentFolder() {
+  if (!currentFolderId) {
+    alert("Ouvre d'abord un dossier a renommer.");
+    return;
+  }
+
+  const folder = state.folders.find(item => item.id === currentFolderId);
+  if (!folder) return;
+
+  const name = prompt("Nouveau nom du dossier", folder.name);
+  if (!name || !name.trim()) return;
+
+  folder.name = name.trim();
+  saveState();
+  render();
+}
+
 function renderFolderSelect() {
   noteFolderSelect.innerHTML = "";
 
@@ -820,14 +849,12 @@ function openEditor(noteId = null) {
       ? note.content
       : textToEditorHtml(note.content);
     noteFolderSelect.value = note.folderId;
-    editorDate.textContent = getEditorDateLabel(note.updatedAt);
     setFavoriteButton(note.favorite);
     deleteBtn.style.display = "inline-grid";
   } else {
     noteTitleInput.value = "";
     noteContentInput.innerHTML = "";
     noteFolderSelect.value = currentFolderId || state.folders[0].id;
-    editorDate.textContent = getEditorDateLabel();
     setFavoriteButton(false);
     deleteBtn.style.display = "none";
   }
@@ -838,13 +865,18 @@ function openEditor(noteId = null) {
 }
 
 function closeEditor() {
+  saveNote();
+  closeEditorWithoutSave();
+}
+
+function closeEditorWithoutSave() {
   editorModal.classList.remove("open");
   editorModal.setAttribute("aria-hidden", "true");
   editingNoteId = null;
   clearSelectedImage();
 }
 
-function saveNote() {
+function saveNote(options = {}) {
   const title = noteTitleInput.value.trim() || "Sans titre";
   syncChecklistState();
   prepareContentForSave();
@@ -852,7 +884,6 @@ function saveNote() {
   const folderId = noteFolderSelect.value;
 
   if (!hasEditorContent() && title === "Sans titre") {
-    closeEditor();
     return;
   }
 
@@ -865,7 +896,7 @@ function saveNote() {
     existing.updatedAt = new Date().toISOString();
   } else {
     state.notes.unshift({
-      id: crypto.randomUUID(),
+      id: createId("note"),
       title,
       content,
       folderId,
@@ -875,11 +906,22 @@ function saveNote() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
+    editingNoteId = state.notes[0].id;
+    deleteBtn.style.display = "inline-grid";
   }
 
   saveState();
-  closeEditor();
-  render();
+  if (!options.silent) render();
+}
+
+function scheduleAutoSave() {
+  window.clearTimeout(autoSaveTimer);
+  autoSaveTimer = window.setTimeout(() => {
+    if (editorModal.classList.contains("open")) {
+      saveNote({ silent: true });
+      renderNotes();
+    }
+  }, 450);
 }
 
 function toggleFavorite() {
@@ -909,7 +951,7 @@ function deleteNote() {
   }
 
   saveState();
-  closeEditor();
+  closeEditorWithoutSave();
   render();
 }
 
@@ -926,6 +968,13 @@ openSidebarBtn.addEventListener("click", openSidebar);
 closeSidebarBtn.addEventListener("click", closeSidebar);
 overlay.addEventListener("click", closeSidebar);
 attachSidebarSwipeClose();
+
+folderMenuBtn.addEventListener("click", () => {
+  folderActions.classList.toggle("open");
+});
+
+createFolderBtn.addEventListener("click", createFolder);
+renameFolderBtn.addEventListener("click", renameCurrentFolder);
 
 document.querySelectorAll(".menu-item").forEach(item => {
   item.addEventListener("click", () => {
@@ -982,9 +1031,11 @@ groupByMonthToggle.addEventListener("change", () => {
 
 addNoteBtn.addEventListener("click", () => openEditor());
 cancelEditBtn.addEventListener("click", closeEditor);
-saveNoteBtn.addEventListener("click", saveNote);
 favoriteBtn.addEventListener("click", toggleFavorite);
 deleteBtn.addEventListener("click", deleteNote);
+
+noteTitleInput.addEventListener("input", scheduleAutoSave);
+noteFolderSelect.addEventListener("change", scheduleAutoSave);
 
 noteContentInput.addEventListener("click", event => {
   const copyButton = event.target.closest(".copy-button");
@@ -1008,7 +1059,10 @@ noteContentInput.addEventListener("click", event => {
 noteContentInput.addEventListener("keyup", saveEditorSelection);
 noteContentInput.addEventListener("mouseup", saveEditorSelection);
 noteContentInput.addEventListener("touchend", saveEditorSelection);
-noteContentInput.addEventListener("input", saveEditorSelection);
+noteContentInput.addEventListener("input", () => {
+  saveEditorSelection();
+  scheduleAutoSave();
+});
 
 imageInput.addEventListener("change", async () => {
   const files = Array.from(imageInput.files);
@@ -1019,6 +1073,7 @@ imageInput.addEventListener("change", async () => {
     insertImage(src);
   }
   imageInput.value = "";
+  scheduleAutoSave();
 });
 
 coverInput.addEventListener("change", async () => {
