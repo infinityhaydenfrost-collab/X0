@@ -51,6 +51,7 @@ button {
   position: fixed;
   inset: 0 auto 0 0;
   width: min(86vw, 420px);
+  max-height: 100vh;
   background: var(--surface);
   z-index: 20;
   padding: 34px 18px;
@@ -58,7 +59,10 @@ button {
   box-shadow: var(--shadow);
   transform: translateX(-105%);
   transition: transform 0.25s ease;
-  touch-action: pan-y;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y pan-x;
   will-change: transform;
 }
 
@@ -381,6 +385,76 @@ button {
 .notes-area.view-detail .notes-grid {
   grid-template-columns: 1fr;
   gap: 6px;
+}
+
+.folder-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap: 16px;
+}
+
+.folder-card {
+  position: relative;
+  min-height: 138px;
+  overflow: hidden;
+  border-radius: 18px;
+  padding: 18px 16px;
+  text-align: left;
+  color: #111;
+  background: #ffd54d;
+  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.10);
+}
+
+.folder-card.folder-red {
+  background: linear-gradient(135deg, #ff453a 0%, #ffd6dc 100%);
+}
+
+.folder-card.folder-blue {
+  background: linear-gradient(135deg, #7a5cff 0%, #ece8ff 100%);
+}
+
+.folder-card.folder-green {
+  background: linear-gradient(135deg, #16b68f 0%, #dff8ed 100%);
+}
+
+.folder-card-count {
+  position: relative;
+  z-index: 2;
+  color: rgba(0, 0, 0, 0.46);
+  font-size: 18px;
+}
+
+.folder-card-paper {
+  position: absolute;
+  right: -10px;
+  bottom: 26px;
+  width: 82%;
+  height: 76%;
+  border-radius: 14px 0 0 14px;
+  background: rgba(255, 255, 255, 0.80);
+  box-shadow: -8px 0 18px rgba(255, 255, 255, 0.45);
+}
+
+.folder-card-paper::before {
+  content: "";
+  position: absolute;
+  top: -16px;
+  left: 16px;
+  width: 58%;
+  height: 28px;
+  border-radius: 8px 8px 0 0;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.folder-card-name {
+  position: absolute;
+  z-index: 2;
+  left: 16px;
+  right: 14px;
+  bottom: 16px;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.15;
 }
 
 .notes-area.view-gallery .notes-grid {

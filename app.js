@@ -591,6 +591,7 @@ function renderCounts() {
   document.querySelector("#lockedCount").textContent = state.notes.filter(n => n.locked && !n.trashed).length;
   document.querySelector("#trashCount").textContent = state.notes.filter(n => n.trashed).length;
   document.querySelector("#folderCount").textContent = state.folders.length;
+  document.querySelector("#folderMenuCount").textContent = state.folders.length;
 }
 
 function renderFolders() {
@@ -662,18 +663,21 @@ function renderFolderSelect() {
 }
 
 function renderHeader(visibleNotes) {
-  let title = "Toutes les notes 2.0";
+  let title = "Toutes les notes 2.1";
 
   if (currentFolderId) {
     title = state.folders.find(folder => folder.id === currentFolderId)?.name ?? "Dossier";
   }
 
+  if (currentFilter === "folders") title = "Dossiers";
   if (currentFilter === "favorites") title = "Favoris";
   if (currentFilter === "locked") title = "Notes verrouillées";
   if (currentFilter === "trash") title = "Corbeille";
 
   pageTitle.textContent = title;
-  pageSubtitle.textContent = `${visibleNotes.length} note${visibleNotes.length > 1 ? "s" : ""}`;
+  pageSubtitle.textContent = currentFilter === "folders"
+    ? `${state.folders.length} dossier${state.folders.length > 1 ? "s" : ""}, ${state.notes.filter(note => !note.trashed).length} note${state.notes.filter(note => !note.trashed).length > 1 ? "s" : ""}`
+    : `${visibleNotes.length} note${visibleNotes.length > 1 ? "s" : ""}`;
   breadcrumbFolder.textContent = title;
 }
 
@@ -684,6 +688,11 @@ function renderNotes() {
   notesArea.innerHTML = "";
   notesArea.className = `notes-area view-${state.preferences.viewMode} style-${state.preferences.cardStyle}`;
   notesArea.style.setProperty("--note-card-size", `${getCardWidthFromScale(state.preferences.cardSize)}px`);
+
+  if (currentFilter === "folders") {
+    renderFolderOverview();
+    return;
+  }
 
   if (visibleNotes.length === 0) {
     notesArea.innerHTML = `<p class="empty-state">Aucune note pour l'instant.</p>`;
@@ -716,6 +725,34 @@ function renderNotes() {
     group.appendChild(renderNotesGrid(notes));
     notesArea.appendChild(group);
   });
+}
+
+function renderFolderOverview() {
+  notesArea.className = "notes-area folders-overview";
+
+  const grid = document.createElement("div");
+  grid.className = "folder-card-grid";
+
+  state.folders.forEach(folder => {
+    const count = state.notes.filter(note => note.folderId === folder.id && !note.trashed).length;
+    const button = document.createElement("button");
+    button.className = `folder-card ${folder.color}`;
+    button.innerHTML = `
+      <span class="folder-card-count">${count}</span>
+      <span class="folder-card-paper"></span>
+      <span class="folder-card-name">${escapeHtml(folder.name)}</span>
+    `;
+
+    button.addEventListener("click", () => {
+      currentFolderId = folder.id;
+      currentFilter = "folder";
+      render();
+    });
+
+    grid.appendChild(button);
+  });
+
+  notesArea.appendChild(grid);
 }
 
 function renderNotesGrid(notes) {
