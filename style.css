@@ -574,6 +574,18 @@ button {
   color: #d22;
 }
 
+.cover-position-controls {
+  display: none;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.cover-position-controls button {
+  min-height: 38px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
 /* Editor */
 .editor-modal {
   position: fixed;
@@ -590,11 +602,11 @@ button {
 .editor-card {
   width: 100%;
   min-height: 100vh;
+  max-height: 100vh;
   background: var(--surface);
   padding: 14px 14px max(12px, env(safe-area-inset-bottom));
-  display: grid;
-  grid-template-rows: auto auto auto 1fr auto;
-  gap: 8px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .editor-header {
@@ -843,6 +855,9 @@ button {
 }
 
 .editor-tools {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -851,7 +866,7 @@ button {
   padding: 2px 0;
   overflow-x: auto;
   scrollbar-width: none;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.96);
   border-top: 1px solid #f2f2f2;
   border-bottom: 1px solid #f2f2f2;
   box-shadow: none;

@@ -87,6 +87,7 @@ const coverInput = document.querySelector("#coverInput");
 const noteActionSheet = document.querySelector("#noteActionSheet");
 const noteActionTitle = document.querySelector("#noteActionTitle");
 const coverNoteBtn = document.querySelector("#coverNoteBtn");
+const coverPositionControls = document.querySelector("#coverPositionControls");
 const removeCoverBtn = document.querySelector("#removeCoverBtn");
 const deleteSelectedNoteBtn = document.querySelector("#deleteSelectedNoteBtn");
 const closeNoteActionBtn = document.querySelector("#closeNoteActionBtn");
@@ -416,6 +417,7 @@ function openNoteActions(noteId) {
   selectedNoteId = noteId;
   noteActionTitle.textContent = note.title || "Sans titre";
   coverNoteBtn.textContent = note.coverImage ? "Changer la couverture" : "Ajouter une couverture";
+  coverPositionControls.style.display = note.coverImage ? "grid" : "none";
   removeCoverBtn.style.display = note.coverImage ? "block" : "none";
   noteActionSheet.classList.add("open");
   noteActionSheet.setAttribute("aria-hidden", "false");
@@ -443,6 +445,7 @@ function setSelectedNoteCover(src) {
   if (!note) return;
 
   note.coverImage = src;
+  note.coverPosition = note.coverPosition || "50% 50%";
   note.updatedAt = new Date().toISOString();
   saveState();
   closeNoteActions();
@@ -485,9 +488,20 @@ function removeSelectedNoteCover() {
   if (!note) return;
 
   delete note.coverImage;
+  delete note.coverPosition;
   note.updatedAt = new Date().toISOString();
   saveState();
   closeNoteActions();
+  render();
+}
+
+function setSelectedNoteCoverPosition(position) {
+  const note = state.notes.find(item => item.id === selectedNoteId);
+  if (!note || !note.coverImage) return;
+
+  note.coverPosition = position;
+  note.updatedAt = new Date().toISOString();
+  saveState();
   render();
 }
 
@@ -696,7 +710,7 @@ function renderNoteCard(note) {
     ? getShortDate(note.createdAt)
     : getShortDate(note.updatedAt);
   const coverHtml = note.coverImage
-    ? `<img class="note-cover" src="${note.coverImage}" alt="Couverture de la note">`
+    ? `<img class="note-cover" src="${note.coverImage}" alt="Couverture de la note" style="object-position: ${note.coverPosition || "50% 50%"};">`
     : "";
   const paperHtml = state.preferences.showPreview
     ? `<div class="note-paper">${coverHtml || escapeHtml(preview.slice(0, 140))}</div>`
@@ -1024,6 +1038,12 @@ noteActionSheet.addEventListener("click", event => {
 
 coverNoteBtn.addEventListener("click", () => {
   coverInput.click();
+});
+
+coverPositionControls.querySelectorAll("button").forEach(button => {
+  button.addEventListener("click", () => {
+    setSelectedNoteCoverPosition(button.dataset.coverPosition);
+  });
 });
 
 removeCoverBtn.addEventListener("click", removeSelectedNoteCover);
