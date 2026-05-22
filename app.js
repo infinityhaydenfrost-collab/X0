@@ -662,7 +662,7 @@ function renderFolderSelect() {
 }
 
 function renderHeader(visibleNotes) {
-  let title = "Toutes les notes";
+  let title = "Toutes les notes 2.0";
 
   if (currentFolderId) {
     title = state.folders.find(folder => folder.id === currentFolderId)?.name ?? "Dossier";
