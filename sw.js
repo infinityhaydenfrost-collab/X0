@@ -1,4 +1,4 @@
-const CACHE_NAME = "notes-app-v18";
+const CACHE_NAME = "notes-app-v19";
 const APP_FILES = [
   "./",
   "./index.html",

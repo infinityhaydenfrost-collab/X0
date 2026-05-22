@@ -187,6 +187,18 @@ button {
   color: var(--green-folder);
 }
 
+.folder-yellow {
+  color: #ffc400;
+}
+
+.folder-purple {
+  color: #9b5cff;
+}
+
+.folder-pink {
+  color: #ff9fb5;
+}
+
 .overlay {
   position: fixed;
   inset: 0;
@@ -399,17 +411,17 @@ button {
 
 .folder-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, var(--note-card-size, 132px));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, var(--folder-card-size, 112px));
+  gap: 12px;
   justify-content: start;
 }
 
 .folder-card {
   position: relative;
-  min-height: 138px;
+  min-height: 112px;
   overflow: hidden;
-  border-radius: 18px;
-  padding: 18px 16px;
+  border-radius: 16px;
+  padding: 13px 12px;
   text-align: left;
   color: #111;
   background: #ffd54d;
@@ -435,17 +447,29 @@ button {
   background: linear-gradient(135deg, #16b68f 0%, #dff8ed 100%);
 }
 
+.folder-card.folder-yellow {
+  background: linear-gradient(135deg, #ffc400 0%, #fff5c5 100%);
+}
+
+.folder-card.folder-purple {
+  background: linear-gradient(135deg, #9b5cff 0%, #eee7ff 100%);
+}
+
+.folder-card.folder-pink {
+  background: linear-gradient(135deg, #ff9fb5 0%, #ffe1e8 100%);
+}
+
 .folder-card-count {
   position: relative;
   z-index: 2;
   color: rgba(0, 0, 0, 0.46);
-  font-size: 18px;
+  font-size: 15px;
 }
 
 .folder-card-paper {
   position: absolute;
   right: -10px;
-  bottom: 26px;
+  bottom: 20px;
   width: 82%;
   height: 76%;
   border-radius: 14px 0 0 14px;
@@ -456,10 +480,10 @@ button {
 .folder-card-paper::before {
   content: "";
   position: absolute;
-  top: -16px;
+  top: -12px;
   left: 16px;
   width: 58%;
-  height: 28px;
+  height: 22px;
   border-radius: 8px 8px 0 0;
   background: rgba(255, 255, 255, 0.92);
 }
@@ -467,10 +491,10 @@ button {
 .folder-card-name {
   position: absolute;
   z-index: 2;
-  left: 16px;
-  right: 14px;
-  bottom: 16px;
-  font-size: 20px;
+  left: 12px;
+  right: 10px;
+  bottom: 12px;
+  font-size: 16px;
   font-weight: 800;
   line-height: 1.15;
 }

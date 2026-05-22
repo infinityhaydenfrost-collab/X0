@@ -56,6 +56,7 @@ const folderMenuBtn = document.querySelector("#folderMenuBtn");
 const folderActions = document.querySelector("#folderActions");
 const createFolderBtn = document.querySelector("#createFolderBtn");
 const renameFolderBtn = document.querySelector("#renameFolderBtn");
+const colorFolderBtn = document.querySelector("#colorFolderBtn");
 const notesArea = document.querySelector("#notesArea");
 const pageTitle = document.querySelector("#pageTitle");
 const pageSubtitle = document.querySelector("#pageSubtitle");
@@ -629,7 +630,7 @@ function createFolder() {
   const name = prompt("Nom du nouveau dossier");
   if (!name || !name.trim()) return;
 
-  const colors = ["folder-red", "folder-blue", "folder-green"];
+  const colors = ["folder-red", "folder-blue", "folder-green", "folder-yellow", "folder-purple", "folder-pink"];
   state.folders.push({
     id: createId("folder"),
     name: name.trim(),
@@ -657,6 +658,35 @@ function renameCurrentFolder() {
   render();
 }
 
+function changeCurrentFolderColor() {
+  if (!currentFolderId) {
+    alert("Ouvre d'abord un dossier pour changer sa couleur.");
+    return;
+  }
+
+  const folder = state.folders.find(item => item.id === currentFolderId);
+  if (!folder) return;
+
+  const color = prompt("Couleur : rouge, bleu, vert, jaune, violet ou rose", "jaune");
+  if (!color) return;
+
+  const colorMap = {
+    rouge: "folder-red",
+    bleu: "folder-blue",
+    vert: "folder-green",
+    jaune: "folder-yellow",
+    violet: "folder-purple",
+    rose: "folder-pink"
+  };
+
+  const nextColor = colorMap[color.trim().toLowerCase()];
+  if (!nextColor) return;
+
+  folder.color = nextColor;
+  saveState();
+  render();
+}
+
 function renderFolderSelect() {
   noteFolderSelect.innerHTML = "";
 
@@ -669,7 +699,7 @@ function renderFolderSelect() {
 }
 
 function renderHeader(visibleNotes) {
-  let title = "Toutes les notes 2.2";
+  let title = "Toutes les notes 2.3";
 
   if (currentFolderId) {
     title = state.folders.find(folder => folder.id === currentFolderId)?.name ?? "Dossier";
@@ -735,7 +765,7 @@ function renderNotes() {
 
 function renderFolderOverview() {
   notesArea.className = "notes-area folders-overview";
-  notesArea.style.setProperty("--note-card-size", `${getCardWidthFromScale(state.preferences.cardSize)}px`);
+  notesArea.style.setProperty("--folder-card-size", `${Math.round(getCardWidthFromScale(state.preferences.cardSize) * 0.78)}px`);
 
   const grid = document.createElement("div");
   grid.className = "folder-card-grid";
@@ -1018,6 +1048,7 @@ folderMenuBtn.addEventListener("click", () => {
 
 createFolderBtn.addEventListener("click", createFolder);
 renameFolderBtn.addEventListener("click", renameCurrentFolder);
+colorFolderBtn.addEventListener("click", changeCurrentFolderColor);
 
 document.querySelectorAll(".menu-item").forEach(item => {
   item.addEventListener("click", () => {
