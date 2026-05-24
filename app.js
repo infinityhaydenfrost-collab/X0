@@ -1,5 +1,7 @@
 const STORAGE_KEY = "hayden_notes_v1";
 const STORAGE_BACKUP_KEY = "hayden_notes_v1_backup";
+const APP_VERSION = "2.7";
+const APP_TITLE = `Toutes les notes ${APP_VERSION}`;
 
 const defaultViewPreferences = {
   sortBy: "updatedAt",
@@ -100,7 +102,8 @@ let savedEditorRange = null;
 let autoSaveTimer = null;
 
 function loadState() {
-  const raw = localStorage.getItem(STORAGE_KEY);
+  const nativeRaw = readNativeState();
+  const raw = nativeRaw || localStorage.getItem(STORAGE_KEY);
   const backup = localStorage.getItem(STORAGE_BACKUP_KEY);
 
   if (!raw) {
@@ -158,7 +161,27 @@ function saveState() {
     }
   }
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  const serializedState = JSON.stringify(state);
+  localStorage.setItem(STORAGE_KEY, serializedState);
+  writeNativeState(serializedState);
+}
+
+function readNativeState() {
+  try {
+    if (!window.NotesStorage?.load) return null;
+    const value = window.NotesStorage.load();
+    return value && value !== "null" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeNativeState(serializedState) {
+  try {
+    if (window.NotesStorage?.save) {
+      window.NotesStorage.save(serializedState);
+    }
+  } catch {}
 }
 
 function createId(prefix) {
@@ -728,7 +751,7 @@ function renderFolderSelect() {
 }
 
 function renderHeader(visibleNotes) {
-  let title = "Toutes les notes 2.4";
+  let title = APP_TITLE;
 
   if (currentFolderId) {
     title = state.folders.find(folder => folder.id === currentFolderId)?.name ?? "Dossier";

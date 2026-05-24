@@ -1,13 +1,19 @@
 {
   "name": "Notes",
   "short_name": "Notes",
+  "id": "./",
   "description": "Application personnelle de notes.",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
+  "lang": "fr",
+  "dir": "ltr",
   "display": "standalone",
+  "display_override": ["standalone", "fullscreen"],
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
   "orientation": "portrait",
+  "categories": ["productivity", "utilities"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icon-192.png",
